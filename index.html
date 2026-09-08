@@ -1076,6 +1076,7 @@ function kiesTweede(hoofd, kandidaten){
   for(var i=0;i<kandidaten.length;i++){
     var k = kandidaten[i];
     if(!k || k === hoofd || !BUNDELS[k]) continue;
+    if(CLUBVERSIE && k === 'club') continue;
     if(zit.indexOf(k) > -1) continue;
     return k;
   }
@@ -1115,7 +1116,8 @@ function themaBundel(){
 }
 
 function bereken(){
-  var clubEerst = (antwoord.v4 === 'maand');
+  // in de clubversie nooit de club adviseren, die dames zijn al lid
+  var clubEerst = (antwoord.v4 === 'maand') && !CLUBVERSIE;
   var kaartjes = antwoord.v3.slice();
   var getypt = trefwoordMatch();
   var getyptZonderMatch = (antwoord.v3tekst||'').trim().length > 2 && !getypt;
@@ -1268,7 +1270,7 @@ function toonUitslag(){
 
   // clubblokje onderaan (niet als de club al bovenaan staat)
   var cb = document.getElementById('u-clubblok');
-  if(u.hoofd === 'club' || u.tweede === 'club'){ cb.hidden = true; }
+  if(CLUBVERSIE || u.hoofd === 'club' || u.tweede === 'club'){ cb.hidden = true; }
   else {
     document.getElementById('u-clublink').href = link('club');
     cb.hidden = false;
