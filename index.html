@@ -26,7 +26,8 @@ window.MAILBLUE = {
   formulier: '6',
   or:        'f8654dd5-aea9-4578-a8f0-d8dab25d3b10',
   veldUitkomst:      'field[2]',   // Quiz uitkomst
-  veldEigenAntwoord: 'field[3]'    // Quiz eigen antwoord
+  veldEigenAntwoord: 'field[3]',   // Quiz eigen antwoord
+  veldLink:          'field[4]'    // Quiz link, de checkoutlink van haar bundel
 };
 
 /* ══════════════════════════════════════════════════════════════ */
@@ -1043,6 +1044,7 @@ function naarMailBlue(voornaam, email){
     d.set('email', email);
     d.set(mb.veldUitkomst, bundel(uitslag.hoofd).naam);
     d.set(mb.veldEigenAntwoord, (antwoord.v3tekst || '').trim());
+    if(mb.veldLink) d.set(mb.veldLink, link(uitslag.hoofd));
 
     fetch(mb.url, {
       method: 'POST',
