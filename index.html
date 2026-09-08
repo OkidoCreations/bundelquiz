@@ -18,6 +18,17 @@ window.MAANDBUNDEL = 'maandbundel-september-26';   // elke maand wisselen
 window.CLUB_ACTIE  = '';                            // leeg = geen actie zichtbaar
 window.SEIZOEN_TIP = { van: '11-15', tot: '01-31', bundel: 'yearly-balans' };
 
+/* De koppeling met MailBlue. Deze gegevens komen uit het formulier
+   "Bundelquiz" in je MailBlue-account. Alleen wisselen als je daar
+   een nieuw formulier maakt. */
+window.MAILBLUE = {
+  url:      'https://okidocreations.activehosted.com/proc.php',
+  formulier: '6',
+  or:        'f8654dd5-aea9-4578-a8f0-d8dab25d3b10',
+  veldUitkomst:      'field[2]',   // Quiz uitkomst
+  veldEigenAntwoord: 'field[3]'    // Quiz eigen antwoord
+};
+
 /* ══════════════════════════════════════════════════════════════ */
 </script>
 
@@ -1006,23 +1017,40 @@ function mailVerder(){
   f.hidden = true;
   naam = n;
 
-  /* ─────────────────────────────────────────────────────────────
-     HIER KOMT STRAKS DE MAILBLUE-KOPPELING.
-     Nu wordt er nog niets verstuurd. Klaargezet:
-     ───────────────────────────────────────────────────────────── */
-  window.QUIZ_INSCHRIJVING = {
-    voornaam: n,
-    email: m,
-    uitkomst: uitslag.hoofd,
-    uitkomst_naam: bundel(uitslag.hoofd).naam,
-    tweede_tip: uitslag.tweede || '',
-    getypt_antwoord: antwoord.v3tekst || '',
-    aangeklikt: antwoord.v3.join(', '),
-    antwoorden: JSON.stringify(antwoord)
-  };
-  /* ───────────────────────────────────────────────────────────── */
+  naarMailBlue(n, m);
 
   toonUitslag();
+}
+
+/* Stuurt haar gegevens naar het formulier in MailBlue.
+   Er wordt niet gewacht op een antwoord: zij ziet haar uitslag meteen,
+   want daarop wachten kost de helft van de verkopen. Gaat het versturen
+   mis, dan merkt zij daar niets van en zie jij het aan een lege lijst. */
+function naarMailBlue(voornaam, email){
+  var mb = window.MAILBLUE;
+  if(!mb || !mb.url) return;
+  try{
+    var d = new URLSearchParams();
+    d.set('u', mb.formulier);
+    d.set('f', mb.formulier);
+    d.set('s', '');
+    d.set('c', '0');
+    d.set('m', '0');
+    d.set('act', 'sub');
+    d.set('v', '2');
+    if(mb.or) d.set('or', mb.or);
+    d.set('fullname', voornaam);
+    d.set('email', email);
+    d.set(mb.veldUitkomst, bundel(uitslag.hoofd).naam);
+    d.set(mb.veldEigenAntwoord, (antwoord.v3tekst || '').trim());
+
+    fetch(mb.url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+      body: d.toString()
+    })['catch'](function(){ /* stilletjes, zij hoeft hier niks van te merken */ });
+  }catch(e){ /* idem */ }
 }
 
 function opnieuw(){
